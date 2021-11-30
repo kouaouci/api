@@ -142,10 +142,10 @@ abstract class Model
     {
         $date = date("Y-m-d");
         $statement = $this->bdd->prepare(
-            "SELECT user.pseudo, score.category, MAX(score.score), score.date from {$this->table} 
-            LEFT JOIN user ON {$this->table}.user_id = user.id 
-            WHERE score.date = ? 
-            AND user.id = ?"
+            "SELECT category, score from {$this->table} 
+            WHERE date = ? 
+            AND user_id = ?
+            ORDER BY score DESC LIMIT 1"
         );
         $statement->execute(array($date, $id));
         $items = $statement->fetch();
@@ -156,7 +156,7 @@ abstract class Model
     {
         $date = date("Y-m-d");
         $statement = $this->bdd->prepare(
-            "SELECT user.pseudo, score.category, MAX(score.score), score.date from {$this->table} 
+            "SELECT user.pseudo, score.category, MAX(score.score) as score, score.date from {$this->table} 
             LEFT JOIN user ON {$this->table}.user_id = user.id 
             WHERE score.date = ? 
             AND user.id = ?
@@ -170,7 +170,7 @@ abstract class Model
     public function getBestScoreByUser($id)
     {
         $statement = $this->bdd->prepare(
-            "SELECT user.pseudo, score.category, MAX(score.score), score.date from {$this->table} 
+            "SELECT user.pseudo, score.category, MAX(score.score) as score, score.date from {$this->table} 
             LEFT JOIN user ON {$this->table}.user_id = user.id 
             WHERE user.id = ?"
         );
@@ -182,7 +182,7 @@ abstract class Model
     public function getBestScoreByUserAndByCategory($id, $category)
     {
         $statement = $this->bdd->prepare(
-            "SELECT user.pseudo, score.category, MAX(score.score), score.date from {$this->table} 
+            "SELECT user.pseudo, score.category, MAX(score.score) as score, score.date from {$this->table} 
             LEFT JOIN user ON {$this->table}.user_id = user.id 
             WHERE user.id = ?
             AND category = ?"
@@ -190,6 +190,14 @@ abstract class Model
         $statement->execute(array($id, $category));
         $items = $statement->fetch();
         return $items;
+    }
+
+    public function getNumberOfExercicesDoneByUser($id)
+    {
+        $statement = $this->bdd->prepare("SELECT * FROM {$this->table} WHERE user_id = ?");
+        $statement->execute(array($id));
+        $count = $statement->rowCount();
+        return $count;
     }
 
     // Inscription

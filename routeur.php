@@ -248,6 +248,21 @@ if (isset($_GET['controller'])) {
                     echo json_encode($res, JSON_UNESCAPED_UNICODE);
                 }
             }
+        } else if ($action === "getNumberOfExercicesDoneByUser") {
+            if ($model === "score") {
+                if (!empty($_GET['userId'])) {
+                    session_start();
+                    if (isset($_SESSION['email'])) {
+                        $model = new \model\Score();
+                        $id = (int)verifyInput($_GET['userId']);
+                        $res = $model->getNumberOfExercicesDoneByUser($id);
+                        echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                    } else echo "You're not connected";
+                } else {
+                    $res = "Veuillez spécifier un user id et une catégorie";
+                    echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                }
+            }
         }
     }
 } elseif (isset($_GET['contact'])) {
