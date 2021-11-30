@@ -155,11 +155,11 @@ abstract class Model
     {
         $date = date("Y-m-d");
         $statement = $this->bdd->prepare(
-            "SELECT user.pseudo, score.category, MAX(score.score) as score, score.date from {$this->table} 
+            "SELECT user.pseudo, score.category, score.score as score, score.date from {$this->table} 
             LEFT JOIN user ON {$this->table}.user_id = user.id 
             WHERE score.date = ? 
             AND user.id = ?
-            AND category = ?"
+            AND category = ? ORDER BY score.score DESC LIMIT 1"
         );
         $statement->execute(array($date, $id, $category));
         $items = $statement->fetch();
