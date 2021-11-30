@@ -126,12 +126,11 @@ abstract class Model
 
     public function getBestScoresByCategory($category)
     {
-        $statement = $this->bdd->prepare("SELECT user.pseudo, score.category, MAX(score.score) as score, score.date 
-        from {$this->table} 
-        LEFT JOIN user ON {$this->table}.user_id = user.id
-        WHERE category = ? 
-        GROUP BY user.pseudo
-        ORDER BY score 
+        $statement = $this->bdd->prepare("SELECT u.pseudo, s.category, s.score, s.date
+        FROM score as s
+        LEFT JOIN user as u ON s.user_id = u.id
+        WHERE s.category = ?
+        ORDER BY s.score
         DESC LIMIT 10");
         $statement->execute(array($category));
         $items = $statement->fetchAll();
