@@ -169,9 +169,9 @@ abstract class Model
     public function getBestScoreByUser($id)
     {
         $statement = $this->bdd->prepare(
-            "SELECT user.pseudo, score.category, MAX(score.score) as score, score.date from {$this->table} 
+            "SELECT user.pseudo, score.category, score.score as score, score.date from {$this->table} 
             LEFT JOIN user ON {$this->table}.user_id = user.id 
-            WHERE user.id = ?"
+            WHERE user.id = ? ORDER BY score.score DESC LIMIT 1"
         );
         $statement->execute(array($id));
         $items = $statement->fetch();
