@@ -102,4 +102,59 @@ abstract class Controller
             return $res;
         }
     }
+
+    // Update profile image
+
+    public function updateProfileImage($id)
+    {
+        if (isset($_FILES['image'])) {
+            $image = verifyInput($_FILES['image']['name']);
+            $directory = "assets/images/";
+            $imagePath = $directory . basename($image);
+            $imageSize = $_FILES['image']['size'];
+            $imageTmpName = $_FILES['image']['tmp_name'];
+            $imageExtension = pathinfo($imagePath, PATHINFO_EXTENSION);
+            $imageRandName = $this->rand_str() . "." . $imageExtension;
+            if (
+                $imageExtension  != "jpg"
+                && $imageExtension  != "jpeg"
+                && $imageExtension  != "png"
+            ) {
+                $msg = "Les fichiers autorisés sont: .jpg, .jpeg, .png";
+                return $msg;
+            }
+            if ($imageSize > 2000000) {
+                $msg = "Un fichier image ne doit pas dépasser 2Mo";
+                return $msg;
+            }
+            if (file_exists($imagePath)) {
+                $msg = "Ce fichier a déjà été uploadé";
+                return $msg;
+            }
+            if (move_uploaded_file($imageTmpName, $directory . $imageRandName)) {
+                $url = "https://api-drum-sensei.anthony-charretier.fr/assets/images/";
+                $newImageName = $url . $imageRandName;
+                $this->model->updateProfileImage($newImageName, $id);
+                $res = "success";
+                return $res;
+            } else {
+                $msg = "Il y a eu une erreur lors de l\'upload";
+                return $msg;
+            }
+        } else {
+            $res = "veuillez uploader une image";
+            return $res;
+        }
+    }
+
+    public function rand_str($length = 30)
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
 }

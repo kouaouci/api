@@ -55,17 +55,17 @@ if (isset($_GET['controller'])) {
                     echo json_encode($res, JSON_UNESCAPED_UNICODE);
                 } else echo "You're not connected";
             }
-        } elseif ($action === "update") {
-            if (isset($_GET['id'])) {
-                $id = verifyInput($_GET['id']);
+        } elseif ($action === "updateProfileImage") {
+            if (isset($_GET['userId'])) {
+                $id = verifyInput($_GET['userId']);
                 if (!is_nan($id)) {
                     if ($controller === "user") {
-                        // session_start();
-                        // if (isset($_SESSION['email'])) {
-                        //     $controller = new \controller\User();
-                        //     $res = $controller->updateUser($id);
-                        //     echo json_encode($res, JSON_UNESCAPED_UNICODE);
-                        // }
+                        session_start();
+                        if (isset($_SESSION['email'])) {
+                            $controller = new \controller\User();
+                            $res = $controller->updateProfileImage($id);
+                            echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                        }
                     }
                 } else {
                     $res = "L'id doit être de type number";

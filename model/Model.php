@@ -128,8 +128,8 @@ abstract class Model
     {
         $statement = $this->bdd->prepare("SELECT profile_image FROM {$this->table} WHERE id = ?");
         $statement->execute(array($id));
-        $user = $statement->fetch();
-        return $user;
+        $item = $statement->fetch();
+        return $item;
     }
 
     public function getBestScoresByCategory($category)
@@ -223,5 +223,13 @@ abstract class Model
     {
         $statement = $this->bdd->prepare("INSERT INTO {$this->table} (score, category, date, user_id) VALUES (?,?,?,?)");
         $statement->execute(array($score, $category, $date, $id));
+    }
+
+    // Update
+
+    public function updateProfileImage($image, $id)
+    {
+        $statement = $this->bdd->prepare("UPDATE {$this->table} SET profile_image = ? WHERE id = ?");
+        $statement->execute(array($image, $id));
     }
 }
