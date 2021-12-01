@@ -137,6 +137,16 @@ if (isset($_GET['controller'])) {
                 $res = "Veuillez spécifier un id";
                 echo json_encode($res, JSON_UNESCAPED_UNICODE);
             }
+        } elseif ($action === "getProfileImage") {
+            if ($model === "user") {
+                $id = (int)verifyInput($_GET['userId']);
+                session_start();
+                if (isset($_SESSION['email'])) {
+                    $model = new \model\User();
+                    $users = $model->getProfileImage($id);
+                    echo json_encode($users, JSON_UNESCAPED_UNICODE);
+                } else echo "You're not connected";
+            }
         } elseif ($action === "getAll") {
             if ($model === "user") {
                 session_start();

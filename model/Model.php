@@ -124,6 +124,14 @@ abstract class Model
         return $user;
     }
 
+    public function getProfileImage($id)
+    {
+        $statement = $this->bdd->prepare("SELECT profile_image FROM {$this->table} WHERE id = ?");
+        $statement->execute(array($id));
+        $user = $statement->fetch();
+        return $user;
+    }
+
     public function getBestScoresByCategory($category)
     {
         $statement = $this->bdd->prepare("SELECT u.pseudo, s.category, s.score, s.date
