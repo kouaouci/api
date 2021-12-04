@@ -1,15 +1,7 @@
 <?php
 
-// Allow from any origin
-// if (isset($_SERVER["HTTP_REFERER"])) {
-// You can decide if the origin in $_SERVER['HTTP_ORIGIN'] is something you want to allow, or as we do here, just allow all
-// header("Access-Control-Allow-Origin: https://drum-sensei.anthony-charretier.fr");
-// } else {
-//No HTTP_ORIGIN set, so we allow any. You can disallow if needed here
-//     header("Access-Control-Allow-Origin: *");
-// }
-
-header("Access-Control-Allow-Origin: https://drum-sensei.anthony-charretier.fr");
+//header("Access-Control-Allow-Origin: https://drum-sensei.anthony-charretier.fr");
+header("Access-Control-Allow-Origin: http://localhost:4200");
 
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Max-Age: 600");    // cache for 10 minutes
@@ -158,18 +150,28 @@ if (isset($_GET['controller'])) {
                     } else echo "You're not connected";
                 } else echo "You're an escroc, go away";
             }
-        } elseif ($action === "getAll") {
-            // if ($model === "user") {
-            //     session_start();
-            //     $id = (int)verifyInput($_GET['userId']);
-            //     if ($_SESSION['id'] == $id) {
-            //         if (isset($_SESSION['email'])) {
-            //             $model = new \model\User();
-            //             $users = $model->getAll();
-            //             echo json_encode($users, JSON_UNESCAPED_UNICODE);
-            //         } else echo "You're not connected";
-            //     } else echo "You're an escroc, go away";
-            // }
+        } elseif ($action === "checkIfConnected") {
+            if ($model === "user") {
+                $id = (int)verifyInput($_GET['userId']);
+                session_start();
+                if (!$_SESSION['id']) {
+                    echo "Not connected";
+                }
+            }
+        } elseif ($action === "deconnexion") {
+            if ($model === "user") {
+                $id = (int)verifyInput($_GET['userId']);
+                session_start();
+                if ($_SESSION['id'] == $id) {
+                    $_SESSION = array();
+                    session_destroy();
+                    $res = "Disconnected";
+                    echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                } else {
+                    $res = "Not connected";
+                    echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                }
+            }
         } else if ($action === "getBestScoresByCategory") {
             if ($model === "score") {
                 $model = new \model\Score();
