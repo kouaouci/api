@@ -1,13 +1,15 @@
 <?php
 
 // Allow from any origin
-if (isset($_SERVER["HTTP_ORIGIN"])) {
-    // You can decide if the origin in $_SERVER['HTTP_ORIGIN'] is something you want to allow, or as we do here, just allow all
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-} else {
-    //No HTTP_ORIGIN set, so we allow any. You can disallow if needed here
-    header("Access-Control-Allow-Origin: *");
-}
+// if (isset($_SERVER["HTTP_REFERER"])) {
+// You can decide if the origin in $_SERVER['HTTP_ORIGIN'] is something you want to allow, or as we do here, just allow all
+// header("Access-Control-Allow-Origin: https://drum-sensei.anthony-charretier.fr");
+// } else {
+//No HTTP_ORIGIN set, so we allow any. You can disallow if needed here
+//     header("Access-Control-Allow-Origin: *");
+// }
+
+header("Access-Control-Allow-Origin: https://drum-sensei.anthony-charretier.fr");
 
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Max-Age: 600");    // cache for 10 minutes
@@ -50,23 +52,28 @@ if (isset($_GET['controller'])) {
             if ($controller === "score") {
                 session_start();
                 if (isset($_SESSION['email'])) {
-                    $controller = new \controller\Score();
-                    $res = $controller->setScore();
-                    echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                    $id = (int)verifyInput($_POST['id']);
+                    if ($_SESSION['id'] == $id) {
+                        $controller = new \controller\Score();
+                        $res = $controller->setScore();
+                        echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                    } else echo "You're an escroc, go away";
                 } else echo "You're not connected";
             }
         } elseif ($action === "updateProfileImage") {
             if (isset($_GET['userId'])) {
+                session_start();
                 $id = verifyInput($_GET['userId']);
                 if (!is_nan($id)) {
-                    if ($controller === "user") {
-                        session_start();
-                        if (isset($_SESSION['email'])) {
-                            $controller = new \controller\User();
-                            $res = $controller->updateProfileImage($id);
-                            echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                    if ($_SESSION['id'] == $id) {
+                        if ($controller === "user") {
+                            if (isset($_SESSION['email'])) {
+                                $controller = new \controller\User();
+                                $res = $controller->updateProfileImage($id);
+                                echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                            }
                         }
-                    }
+                    } else echo "You're an escroc, go away";
                 } else {
                     $res = "L'id doit être de type number";
                     echo json_encode($res, JSON_UNESCAPED_UNICODE);
@@ -123,11 +130,13 @@ if (isset($_GET['controller'])) {
                 if (!is_nan($id)) {
                     if ($model === "user") {
                         session_start();
-                        if (isset($_SESSION['email'])) {
-                            $model = new \model\User();
-                            $user = $model->getOne($id);
-                            echo json_encode($user, JSON_UNESCAPED_UNICODE);
-                        } else echo "You're not connected";
+                        if ($_SESSION['id'] == $id) {
+                            if (isset($_SESSION['email'])) {
+                                $model = new \model\User();
+                                $user = $model->getOne($id);
+                                echo json_encode($user, JSON_UNESCAPED_UNICODE);
+                            } else echo "You're not connected";
+                        } else echo "You're an escroc, go away";
                     }
                 } else {
                     $res = "L'id doit être de type number";
@@ -141,21 +150,26 @@ if (isset($_GET['controller'])) {
             if ($model === "user") {
                 $id = (int)verifyInput($_GET['userId']);
                 session_start();
-                if (isset($_SESSION['email'])) {
-                    $model = new \model\User();
-                    $users = $model->getProfileImage($id);
-                    echo json_encode($users, JSON_UNESCAPED_UNICODE);
-                } else echo "You're not connected";
+                if ($_SESSION['id'] == $id) {
+                    if (isset($_SESSION['email'])) {
+                        $model = new \model\User();
+                        $users = $model->getProfileImage($id);
+                        echo json_encode($users, JSON_UNESCAPED_UNICODE);
+                    } else echo "You're not connected";
+                } else echo "You're an escroc, go away";
             }
         } elseif ($action === "getAll") {
-            if ($model === "user") {
-                session_start();
-                if (isset($_SESSION['email'])) {
-                    $model = new \model\User();
-                    $users = $model->getAll();
-                    echo json_encode($users, JSON_UNESCAPED_UNICODE);
-                } else echo "You're not connected";
-            }
+            // if ($model === "user") {
+            //     session_start();
+            //     $id = (int)verifyInput($_GET['userId']);
+            //     if ($_SESSION['id'] == $id) {
+            //         if (isset($_SESSION['email'])) {
+            //             $model = new \model\User();
+            //             $users = $model->getAll();
+            //             echo json_encode($users, JSON_UNESCAPED_UNICODE);
+            //         } else echo "You're not connected";
+            //     } else echo "You're an escroc, go away";
+            // }
         } else if ($action === "getBestScoresByCategory") {
             if ($model === "score") {
                 $model = new \model\Score();
@@ -173,14 +187,16 @@ if (isset($_GET['controller'])) {
                     if (isset($_SESSION['email'])) {
                         $model = new \model\Score();
                         $id = (int)verifyInput($_GET['userId']);
-                        $checkIfHasPlayedToday = $model->checkIfHasPlayedToday($id);
-                        if ($checkIfHasPlayedToday > 0) {
-                            $res = $model->getBestScoreOfTheDay($id);
-                            echo json_encode($res, JSON_UNESCAPED_UNICODE);
-                        } else {
-                            $res = "No score";
-                            echo json_encode($res, JSON_UNESCAPED_UNICODE);
-                        }
+                        if ($_SESSION['id'] == $id) {
+                            $checkIfHasPlayedToday = $model->checkIfHasPlayedToday($id);
+                            if ($checkIfHasPlayedToday > 0) {
+                                $res = $model->getBestScoreOfTheDay($id);
+                                echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                            } else {
+                                $res = "No score";
+                                echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                            }
+                        } else echo "You're an escroc, go away";
                     } else echo "You're not connected";
                 } else {
                     $res = "Veuillez spécifier un user id";
@@ -194,15 +210,17 @@ if (isset($_GET['controller'])) {
                     if (isset($_SESSION['email'])) {
                         $model = new \model\Score();
                         $id = (int)verifyInput($_GET['userId']);
-                        $category = urldecode(verifyInput($_GET['category']));
-                        $checkIfHasPlayedTodayThatCategory = $model->checkIfHasPlayedTodayThatCategory($id, $category);
-                        if ($checkIfHasPlayedTodayThatCategory > 0) {
-                            $res = $model->getBestScoreOfTheDayByCategory($id, $category);
-                            echo json_encode($res, JSON_UNESCAPED_UNICODE);
-                        } else {
-                            $res = "No score";
-                            echo json_encode($res, JSON_UNESCAPED_UNICODE);
-                        }
+                        if ($_SESSION['id'] == $id) {
+                            $category = urldecode(verifyInput($_GET['category']));
+                            $checkIfHasPlayedTodayThatCategory = $model->checkIfHasPlayedTodayThatCategory($id, $category);
+                            if ($checkIfHasPlayedTodayThatCategory > 0) {
+                                $res = $model->getBestScoreOfTheDayByCategory($id, $category);
+                                echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                            } else {
+                                $res = "No score";
+                                echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                            }
+                        } else echo "You're an escroc, go away";
                     } else echo "You're not connected";
                 } else {
                     $res = "Veuillez spécifier un user id et une catégorie";
@@ -216,14 +234,16 @@ if (isset($_GET['controller'])) {
                     if (isset($_SESSION['email'])) {
                         $model = new \model\Score();
                         $id = (int)verifyInput($_GET['userId']);
-                        $checkIfHasAlredayPlayed = $model->checkIfHasAlredayPlayed($id);
-                        if ($checkIfHasAlredayPlayed > 0) {
-                            $res = $model->getBestScoreByUser($id);
-                            echo json_encode($res, JSON_UNESCAPED_UNICODE);
-                        } else {
-                            $res = "No score";
-                            echo json_encode($res, JSON_UNESCAPED_UNICODE);
-                        }
+                        if ($_SESSION['id'] == $id) {
+                            $checkIfHasAlredayPlayed = $model->checkIfHasAlredayPlayed($id);
+                            if ($checkIfHasAlredayPlayed > 0) {
+                                $res = $model->getBestScoreByUser($id);
+                                echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                            } else {
+                                $res = "No score";
+                                echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                            }
+                        } else echo "You're an escroc, go away";
                     } else echo "You're not connected";
                 } else {
                     $res = "Veuillez spécifier un user id et une catégorie";
@@ -237,21 +257,23 @@ if (isset($_GET['controller'])) {
                     if (isset($_SESSION['email'])) {
                         $model = new \model\Score();
                         $id = (int)verifyInput($_GET['userId']);
-                        $category = urldecode(verifyInput($_GET['category']));
-                        $checkIfHasAlredayPlayed = $model->checkIfHasAlredayPlayed($id);
-                        if ($checkIfHasAlredayPlayed > 0) {
-                            $checkIfHasPlayedhatCategory = $model->checkIfHasPlayedhatCategory($id, $category);
-                            if ($checkIfHasPlayedhatCategory > 0) {
-                                $res = $model->getBestScoreByUserAndByCategory($id, $category);
-                                echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                        if ($_SESSION['id'] == $id) {
+                            $category = urldecode(verifyInput($_GET['category']));
+                            $checkIfHasAlredayPlayed = $model->checkIfHasAlredayPlayed($id);
+                            if ($checkIfHasAlredayPlayed > 0) {
+                                $checkIfHasPlayedhatCategory = $model->checkIfHasPlayedhatCategory($id, $category);
+                                if ($checkIfHasPlayedhatCategory > 0) {
+                                    $res = $model->getBestScoreByUserAndByCategory($id, $category);
+                                    echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                                } else {
+                                    $res = "No score";
+                                    echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                                }
                             } else {
-                                $res = "No score";
+                                $res = "No score at all";
                                 echo json_encode($res, JSON_UNESCAPED_UNICODE);
                             }
-                        } else {
-                            $res = "No score at all";
-                            echo json_encode($res, JSON_UNESCAPED_UNICODE);
-                        }
+                        } else echo "You're an escroc, go away";
                     } else echo "You're not connected";
                 } else {
                     $res = "Veuillez spécifier un user id et une catégorie";
@@ -265,8 +287,10 @@ if (isset($_GET['controller'])) {
                     if (isset($_SESSION['email'])) {
                         $model = new \model\Score();
                         $id = (int)verifyInput($_GET['userId']);
-                        $res = $model->getNumberOfExercicesDoneByUser($id);
-                        echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                        if ($_SESSION['id'] == $id) {
+                            $res = $model->getNumberOfExercicesDoneByUser($id);
+                            echo json_encode($res, JSON_UNESCAPED_UNICODE);
+                        } else echo "You're an escroc, go away";
                     } else echo "You're not connected";
                 } else {
                     $res = "Veuillez spécifier un user id et une catégorie";
